@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            //On Off button
+            var value = 0;
+            var incrementButton = document.getElementById("increment-button");
+	
+
+            // Value = 1 is ON 
+            function incrementValue() 
+            {
+                if (value  == 1) 
+                {
+                    alert("GPS location is now Off");
+                    value--;
+                    //Function to remove user from server. Remove (User idNumber)
+                }
+                else
+                {
+                    if(value == 0)
+                    {
+                        alert("GPS location is now On")
+                        value++;
+                        minute();
+                    }
+                }
+            }
+            incrementButton.addEventListener("click", incrementValue);
+            //See if user is in the building or not
+
+            function minute()
+            {
+                if (navigator.geolocation) {
+                    navigator.geolocation.watchPosition(success);
+                } 
+                else 
+                {
+                    alert("Unable to get current location. Make sure GPS is allowed");
+                }
+            }
+
+            function success(position) 
+            {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude; 
+                
+                if( 1 <= latitude && latitude <= 100 && 1  <= longitude && longitude <= 100 )
+                {
+                    sendCookies();
+                }
+                else 
+                {
+                    alert("not in here"); //remove this
+                    setTimeout(minute, 10000);
+                } 
+            }
+            
+            // Cookie Generator
+            function setCookie(cname,cvalue) 
+            {
+                document.cookie = cname + "=" + cvalue + ";";
+            }
+
+            function getCookie(cname) 
+            {
+                let name = cname + "=";
+                let decodedCookie = decodeURIComponent(document.cookie);
+                let ca = decodedCookie.split(';');
+                for(let i = 0; i < ca.length; i++) {
+                    let c = ca[i];
+                    while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                    }
+                    if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                    }
+                }
+                return "";
+            }
+
+            var user;
+            function checkCookie() 
+            {
+                let user = getCookie("username");
+                if (user != "") {
+                    alert(user);
+                } else {
+                    user = Math.floor((Math.random()* 89999999) + 10000000);
+                    if (user != "" && user != null) {
+                    setCookie("username", user);
+                    }
+                }
+            }
+
+            //POST variable
+            function sendCookies() {
+            	$.ajax({
+                    method : "POST",  //type of method
+                    url  : "insert.php",  //your page
+                    data : {variable: user},// passing the values
+                    success : function(){
+                            alert("success");
+                        }
+                });
+            }
+
+            ///Retrieve language setting
+            function languageChange() {
+		var selectedLanguage = localStorage.getItem("selectedLanguage");
+		var language = document.getElementById("explination");
+                if (selectedLanguage === "svenska") {
+                    language.innerHTML = "Tryck på knappen för att tillåta spårning<br>Appen är inaktiv tills du befinner dig i AWL byggnaden<br>När appen aktiveras gå till den bestämda platsen<br>Ge numret till den andre personen<br>Ha det roligt!";
+                } else {
+                    language.innerHTML = "Click the on button to allow app tracking <br> App stays inactive until you are in AWL house <br> When app goes off, go to the notified place <br> Give the shown code to the other person <br> Have fun socializing!";
+                }
+            }
+
+        </script>
+        <style>
+            @font-face
+            {
+                font-family:'Overpass-VariableFont_wght';
+                src: url(font/Overpass-VariableFont_wght.ttf);
+            }
+            
+            .outline
+            {
+                top: 5vh;
+                bottom: 10vh;
+                left: 5vh;
+                right: 5vh;
+                position: fixed;
+                align-self: center;
+                z-index: 0;
+                background-color: #D82475;
+                font-size: 7rem;
+                font-family:'Overpass-VariableFont_wght';
+                border-top-left-radius: 7.5vh;
+                border-top-right-radius: 7.5vh;
+
+                /*text*/
+                text-align: center;
+                font-family:'Overpass-VariableFont_wght';
+                font-size: 3rem;
+                justify-content: center;
+                padding: 5%;
+                line-height: 200%;
+                color: #FECA41;
+                text-shadow: #8C062B 7px 7px 2px;
+                font-weight: bold;
+            }
+
+            .powerbutton
+            {
+                background-color: #D82475;
+                height: 17.5vh;
+                position: absolute;
+                bottom: 2%;
+                left: 5vh;
+                right: 5vh;
+                border-bottom-left-radius: 7.5vh;
+                border-bottom-right-radius: 7.5vh;
+            }
+
+            .images
+            {
+                width: 17.5vh;
+                position: absolute;
+                bottom: 5%;
+                right: 1%;
+
+            }
+
+            .images2
+            {
+                width: 15vh;
+                position: absolute;
+                bottom: 4%;
+                left: 7vh;
+            }
+        </style>
+    </head>
+    <body onload="checkCookie(); languageChange()" style="background-color: #FC61A7;">
+        <div class="outline" id="explination">Click the on button to allow app tracking <br> App stays inactive until you are in AWL house <br> When app goes off, go to the notified place <br> Give the shown code to the other person <br> Have fun socializing!</div>
+        <div class="powerbutton"> <img src="Images/power_button.png" class="images" onclick="incrementValue()"> </div>
+        <a href="settings.html"><img src="Images/gear.png" class="images2"></a>
+    </body>
+</html>
